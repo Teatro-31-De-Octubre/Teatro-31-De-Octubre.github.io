@@ -1,0 +1,3103 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#091222" />
+    <title>Teatro 31 de Octubre - Llallagua, Potosí | Recorrido 3D Interactivo</title>
+
+    <!-- Fuentes de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Outfit:wght@300;400;500;600;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Dependencias de Postprocesamiento 3D (Google Model-Viewer Effects & Three.js) -->
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.1/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@^0.183.0/build/three.module.min.js"
+      }
+    }
+    </script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer-module.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects/dist/model-viewer-effects.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark-1: #091222;
+            --bg-dark-2: #14243e;
+            /* Cuadros con cristal ahumado y alto contraste para síntesis con luz solar */
+            --bg-card: rgba(8, 15, 28, 0.82);
+            --bg-card-hover: rgba(12, 22, 40, 0.92);
+            --bg-modal: rgba(8, 14, 26, 0.96);
+            --accent-gold: #e5cd9c;
+            --accent-gold-light: #fff3d6;
+            --accent-sun: #ffd166;
+            --accent-sun-bright: #ffe58f;
+            --accent-red: #8b1e2b;
+            --accent-sky: #64b5f6;
+            --text-light: #ffffff;
+            --text-muted: #d0e0f5;
+            --border-gold: rgba(229, 205, 156, 0.45);
+            --border-gold-soft: rgba(229, 205, 156, 0.28);
+            --shadow-glow: 0 0 35px rgba(255, 209, 102, 0.28);
+            
+            /* Variables de Postprocesamiento optimizadas para Día Soleado */
+            --fx-vignette-intensity: 0.52;
+            --fx-grain-intensity: 0.20;
+            --fx-bloom-intensity: 0.85;
+            --fx-sun-intensity: 0.9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            color: var(--text-light);
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark-1);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* -------------------------------------------------------------
+           FONDO DE AMBIENTE: DÍA SOLEADO ANDINO (LLALLAGUA, POTOSÍ)
+        ------------------------------------------------------------- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 75% 15%, rgba(255, 240, 190, 0.52) 0%, rgba(100, 180, 255, 0.32) 30%, rgba(22, 44, 80, 0.82) 65%, rgba(6, 12, 22, 0.96) 100%),
+                url('imagenes/frentte1.jpg') no-repeat center center / cover;
+            filter: blur(10px) brightness(0.72) contrast(1.15) saturate(1.22);
+            transform: scale(1.08);
+            z-index: -3;
+            pointer-events: none;
+        }
+
+        /* Corona y Resplandor Solar en el cielo (Interactivo para Síntesis de Luz) */
+        .sun-corona {
+            position: fixed;
+            top: 25px;
+            right: 14%;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, #ffffff 0%, rgba(255, 245, 195, 0.95) 35%, rgba(255, 210, 120, 0.45) 60%, transparent 80%);
+            border-radius: 50%;
+            pointer-events: auto !important;
+            cursor: pointer;
+            z-index: 2;
+            box-shadow: 0 0 80px rgba(255, 225, 140, 0.85), 0 0 160px rgba(255, 190, 80, 0.5);
+            animation: sunPulse 6s ease-in-out infinite alternate;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .sun-corona:hover {
+            transform: scale(1.12);
+            filter: drop-shadow(0 0 30px rgba(255, 225, 140, 0.95));
+        }
+
+        .sunny-sky-lensflare {
+            position: fixed;
+            top: -80px;
+            right: 4%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(255, 245, 210, 0.42) 0%, rgba(255, 210, 120, 0.22) 30%, rgba(255, 180, 70, 0.08) 55%, transparent 72%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+            mix-blend-mode: screen;
+            filter: blur(25px);
+        }
+
+        @keyframes sunPulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.08); opacity: 1; }
+        }
+
+        /* -------------------------------------------------------------
+           POSTPROCESAMIENTO WEB (SCREEN-SPACE SHADERS & EFECTOS)
+        ------------------------------------------------------------- */
+        .post-processing-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 700;
+            overflow: hidden;
+        }
+
+        /* 1. Viñeta óptica cinematográfica de luz diurna */
+        .postfx-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0, 0, 0, 0.3) 80%, rgba(0, 0, 0, 0.82) 100%);
+            opacity: var(--fx-vignette-intensity);
+            transition: opacity 0.3s ease;
+        }
+
+        /* 2. Grano fotográfico sutil 35mm */
+        .postfx-grain {
+            position: absolute;
+            inset: -50px;
+            opacity: var(--fx-grain-intensity);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+            animation: filmGrainAnim 0.35s steps(5) infinite;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes filmGrainAnim {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-3%, 2%); }
+            40% { transform: translate(2%, -3%); }
+            60% { transform: translate(-2%, -2%); }
+            80% { transform: translate(3%, 1%); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* 3. Bloom / Resplandor solar sobre la piedra del teatro */
+        .postfx-bloom {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 65% 25%, rgba(255, 220, 130, 0.22) 0%, rgba(255, 180, 80, 0.08) 40%, transparent 70%);
+            mix-blend-mode: screen;
+            opacity: var(--fx-bloom-intensity);
+            transition: opacity 0.3s ease;
+        }
+
+        /* 4. Aberración cromática óptica en bordes de lente */
+        .postfx-chromatic {
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 90px rgba(0, 180, 255, 0.09), inset 0 0 150px rgba(255, 160, 40, 0.09);
+            mix-blend-mode: screen;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .postfx-off {
+            opacity: 0 !important;
+        }
+
+        /* -------------------------------------------------------------
+           TRANSICIÓN DE PÁRPADOS ESTILO DIBUJO ANIMADO (CARTOON BLINK)
+        ------------------------------------------------------------- */
+        .cartoon-blink-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 99999;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cartoon-eyelid {
+            width: 100%;
+            height: 50%;
+            background: radial-gradient(ellipse at 50% 50%, #150f1d 0%, #030408 100%);
+            box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.95);
+            position: relative;
+        }
+
+        .eyelid-top {
+            transform-origin: top center;
+            border-bottom: 4px solid var(--accent-gold);
+        }
+
+        .eyelid-bottom {
+            transform-origin: bottom center;
+            border-top: 4px solid var(--accent-gold);
+        }
+
+        .cartoon-blink-overlay.blink-open .eyelid-top {
+            animation: cartoonBlinkOpenTop 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .cartoon-blink-overlay.blink-open .eyelid-bottom {
+            animation: cartoonBlinkOpenBottom 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .cartoon-blink-overlay.blink-close {
+            pointer-events: all;
+        }
+        .cartoon-blink-overlay.blink-close .eyelid-top {
+            animation: cartoonBlinkCloseTop 0.65s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        }
+        .cartoon-blink-overlay.blink-close .eyelid-bottom {
+            animation: cartoonBlinkCloseBottom 0.65s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        }
+
+        @keyframes cartoonBlinkOpenTop {
+            0%   { transform: scaleY(1); }
+            30%  { transform: scaleY(0.15); }
+            50%  { transform: scaleY(0.75); }
+            70%  { transform: scaleY(0.08); }
+            85%  { transform: scaleY(0.25); }
+            100% { transform: scaleY(0); }
+        }
+
+        @keyframes cartoonBlinkOpenBottom {
+            0%   { transform: scaleY(1); }
+            30%  { transform: scaleY(0.15); }
+            50%  { transform: scaleY(0.75); }
+            70%  { transform: scaleY(0.08); }
+            85%  { transform: scaleY(0.25); }
+            100% { transform: scaleY(0); }
+        }
+
+        @keyframes cartoonBlinkCloseTop {
+            0%   { transform: scaleY(0); }
+            35%  { transform: scaleY(0.8); }
+            55%  { transform: scaleY(0.3); }
+            80%  { transform: scaleY(1); }
+            100% { transform: scaleY(1); }
+        }
+
+        @keyframes cartoonBlinkCloseBottom {
+            0%   { transform: scaleY(0); }
+            35%  { transform: scaleY(0.8); }
+            55%  { transform: scaleY(0.3); }
+            80%  { transform: scaleY(1); }
+            100% { transform: scaleY(1); }
+        }
+
+        /* -------------------------------------------------------------
+           NAVBAR SUPERIOR FIJA
+        ------------------------------------------------------------- */
+        .navbar-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 72px;
+            background: rgba(8, 14, 26, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 2px solid var(--border-gold);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--accent-gold);
+            cursor: pointer;
+            transition: transform 0.25s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+
+        .navbar-brand i {
+            font-size: 1.8rem;
+            color: var(--accent-sun);
+            filter: drop-shadow(0 0 10px rgba(255, 209, 102, 0.7));
+        }
+
+        .navbar-brand span {
+            font-family: 'UnifrakturCook', serif;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            color: var(--accent-gold-light);
+            text-shadow: 0 2px 10px rgba(201, 166, 107, 0.5);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            gap: 8px;
+        }
+
+        .nav-item button {
+            background: transparent;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 0.92rem;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .nav-item button i {
+            color: var(--accent-gold);
+            font-size: 1.05rem;
+        }
+
+        .nav-item button:hover {
+            background: rgba(229, 205, 156, 0.18);
+            border-color: var(--border-gold);
+            color: var(--accent-gold-light);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-interiores-nav {
+            background: linear-gradient(135deg, rgba(229, 205, 156, 0.35), rgba(139, 30, 43, 0.6)) !important;
+            border: 1.5px solid var(--accent-gold) !important;
+            color: #fff !important;
+            box-shadow: 0 0 18px rgba(255, 209, 102, 0.4);
+            animation: pulseNavDoor 2.5s infinite;
+        }
+
+        @keyframes pulseNavDoor {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 209, 102, 0.35); }
+            50% { box-shadow: 0 0 26px rgba(255, 209, 102, 0.75); }
+        }
+
+        .btn-bgm-nav {
+            border: 1px solid var(--border-gold-soft) !important;
+        }
+
+        .btn-solar-nav {
+            background: linear-gradient(135deg, rgba(255, 209, 102, 0.28), rgba(139, 30, 43, 0.35)) !important;
+            border: 1.5px solid var(--accent-sun) !important;
+            color: #fff !important;
+            box-shadow: 0 0 14px rgba(255, 209, 102, 0.45);
+            transition: all 0.25s ease;
+        }
+
+        .btn-solar-nav:hover {
+            background: linear-gradient(135deg, rgba(255, 209, 102, 0.45), rgba(139, 30, 43, 0.55)) !important;
+            box-shadow: 0 0 22px rgba(255, 209, 102, 0.75);
+            transform: scale(1.04);
+        }
+
+        /* -------------------------------------------------------------
+           ESCENA 3D DINÁMICA: TEATRO 3D (SOLO AL INICIO, SE EMPEQUEÑECE Y VIAJA A LOS COSTADOS)
+        ------------------------------------------------------------- */
+        .scrolly-bg-container {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        model-viewer#mvTeatroHero {
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            background: transparent;
+            --poster-color: transparent;
+            transform-origin: center center;
+            will-change: transform;
+            transition: filter 0.4s ease;
+        }
+
+        /* Título Gigante del Hero de Fondo Total */
+        .scrolly-hero-title-overlay {
+            position: fixed;
+            top: 92px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 90%;
+            max-width: 1100px;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .scrolly-big-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: clamp(2.3rem, 5.5vw, 5.2rem);
+            color: var(--accent-gold-light);
+            text-transform: uppercase;
+            letter-spacing: clamp(3px, 0.8vw, 11px);
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95), 0 0 40px rgba(255, 209, 102, 0.7);
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .scrolly-big-subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.92rem, 1.7vw, 1.3rem);
+            color: var(--accent-gold);
+            letter-spacing: 3.5px;
+            text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+            text-transform: uppercase;
+        }
+
+        .scrolly-gold-line {
+            height: 3px;
+            width: 200px;
+            background: linear-gradient(90deg, transparent, var(--accent-sun), transparent);
+            margin: 12px auto 0;
+            border-radius: 2px;
+            box-shadow: 0 0 12px rgba(255, 209, 102, 0.8);
+        }
+
+        /* HUD flotante con ángulo y controles de cámara */
+        .scrolly-orbit-hud {
+            position: absolute;
+            bottom: 24px;
+            left: 28px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .orbit-badge {
+            background: rgba(8, 14, 26, 0.65);
+            border: 1px solid var(--border-gold);
+            color: var(--accent-gold-light);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .orbit-hud-btn {
+            background: rgba(8, 14, 26, 0.65);
+            border: 1px solid var(--border-gold);
+            color: var(--accent-gold-light);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(10px);
+            font-size: 0.95rem;
+        }
+
+        .orbit-hud-btn:hover {
+            background: var(--accent-gold);
+            color: #111;
+            transform: scale(1.08);
+        }
+
+        /* -------------------------------------------------------------
+           BOTÓN / HOTSPOT INTERACTIVO FRENTE A LA PUERTA DEL TEATRO5
+        ------------------------------------------------------------- */
+        .door-hotspot {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            pointer-events: auto;
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 50;
+        }
+
+        .door-hotspot:hover {
+            transform: scale(1.18) translateY(-4px);
+        }
+
+        .door-hotspot-pin {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd166, #8b1e2b);
+            border: 2px solid #fff;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 0 28px rgba(255, 209, 102, 0.95), 0 4px 15px rgba(0, 0, 0, 0.8);
+            animation: doorPulseRing 2.2s infinite;
+        }
+
+        @keyframes doorPulseRing {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.85), 0 0 25px rgba(255, 209, 102, 0.95);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(255, 209, 102, 0), 0 0 32px rgba(255, 209, 102, 0.95);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 209, 102, 0), 0 0 25px rgba(255, 209, 102, 0.95);
+            }
+        }
+
+        .door-hotspot-label {
+            position: absolute;
+            bottom: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(8, 14, 26, 0.82);
+            border: 1.5px solid var(--accent-gold);
+            border-radius: 10px;
+            padding: 6px 14px;
+            white-space: nowrap;
+            text-align: center;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            transition: all 0.25s ease;
+        }
+
+        .door-hotspot-label span {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--accent-sun);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .door-hotspot-label strong {
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: 0.92rem;
+            color: #fff;
+        }
+
+        /* -------------------------------------------------------------
+           PISTA DE SCROLLYTELLING Y CUADROS DE TEXTO DE ALTO CONTRASTE
+        ------------------------------------------------------------- */
+        .scrolly-scroll-track {
+            position: relative;
+            z-index: 20;
+            pointer-events: none;
+            padding-top: 0;
+        }
+
+        .scrolly-step {
+            min-height: 105vh;
+            display: flex;
+            align-items: center;
+            padding: 40px 5vw;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Etapa Hero Inicial: El Teatro 3D aparece SOLO, grande y majestuoso */
+        .step-hero-stage {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 50px;
+            pointer-events: none;
+        }
+
+        .hero-stage-badge {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(8, 15, 28, 0.84);
+            border: 1.5px solid var(--border-gold);
+            color: var(--accent-gold-light);
+            font-family: 'Cinzel', serif;
+            font-size: 0.92rem;
+            padding: 10px 22px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 25px rgba(255, 209, 102, 0.35);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            margin-bottom: 14px;
+            animation: heroFloat 3.5s ease-in-out infinite alternate;
+        }
+
+        .hero-stage-badge i {
+            color: var(--accent-sun);
+            font-size: 1.15rem;
+            animation: rotateIcon 10s linear infinite;
+        }
+
+        .hero-scroll-invite {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(229, 205, 156, 0.25), rgba(139, 30, 43, 0.45));
+            border: 1.5px solid var(--accent-sun);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 10px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.75), 0 0 20px rgba(255, 209, 102, 0.4);
+            transition: all 0.25s ease;
+        }
+
+        .hero-scroll-invite:hover {
+            transform: translateY(-3px) scale(1.04);
+            background: linear-gradient(135deg, rgba(255, 209, 102, 0.45), rgba(139, 30, 43, 0.65));
+            box-shadow: 0 12px 30px rgba(255, 209, 102, 0.65);
+        }
+
+        .hero-mouse-pill {
+            width: 18px;
+            height: 26px;
+            border: 2px solid var(--accent-sun);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            padding-top: 4px;
+        }
+
+        .hero-mouse-wheel {
+            width: 3px;
+            height: 6px;
+            background: var(--accent-sun);
+            border-radius: 2px;
+            animation: wheelDrop 1.6s infinite;
+        }
+
+        @keyframes wheelDrop {
+            0% { transform: translateY(0); opacity: 1; }
+            80% { transform: translateY(9px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 0; }
+        }
+
+        @keyframes heroFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+
+        @keyframes rotateIcon {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .cue-bounce {
+            animation: cueBounce 1.5s infinite;
+            color: var(--accent-sun);
+        }
+
+        @keyframes cueBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(6px); }
+            60% { transform: translateY(3px); }
+        }
+
+        /* Cuadros de texto de vidrio con alto contraste (Glassmorphism + Síntesis Solar) */
+        .scrolly-card {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 540px;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-gold);
+            border-radius: 20px;
+            padding: 30px 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 209, 102, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            transition: transform 0.35s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+            position: relative;
+        }
+
+        .scrolly-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 45px rgba(255, 209, 102, 0.35);
+        }
+
+        /* Resplandor solar en la esquina superior derecha (sintetiza con la posición del Sol) */
+        .scrolly-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle at top right, rgba(255, 220, 130, 0.25), transparent 70%);
+            border-radius: 0 20px 0 0;
+            pointer-events: none;
+        }
+
+        .card-left {
+            margin-right: auto;
+        }
+
+        .card-right {
+            margin-left: auto;
+            border-top-color: #ffd166 !important;
+            border-right-color: #ffd166 !important;
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85), 0 0 40px rgba(255, 209, 102, 0.35);
+        }
+
+        .card-center {
+            margin: 0 auto;
+            max-width: 840px;
+            text-align: center;
+        }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(229, 205, 156, 0.22);
+            border: 1px solid var(--border-gold);
+            color: var(--accent-gold-light);
+            font-family: 'Cinzel', serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.05rem;
+            color: #fff6de;
+            margin-bottom: 14px;
+            line-height: 1.25;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 1), 0 4px 18px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 209, 102, 0.45);
+        }
+
+        /* Síntesis con la luz solar: las letras toman gradiente dorado brillante sin perder legibilidad */
+        body.solar-active .card-title {
+            background: linear-gradient(115deg, #ffffff 0%, #fff0b8 25%, #ffd166 50%, #ffffff 75%, #ffb830 100%);
+            background-size: 220% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: solarTextGlaze 6s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 1)) drop-shadow(0 0 12px rgba(255, 209, 102, 0.45));
+        }
+
+        @keyframes solarTextGlaze {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Descripciones y párrafos: Máxima legibilidad bajo luz solar garantizada con sombra doble */
+        .card-desc {
+            font-size: 1.05rem;
+            color: #ffffff !important;
+            margin-bottom: 16px;
+            line-height: 1.7;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 1), 0 2px 8px rgba(0, 0, 0, 0.95);
+            letter-spacing: 0.2px;
+        }
+
+        .card-desc strong {
+            color: #ffd875 !important;
+            font-weight: 700;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 1), 0 0 10px rgba(255, 209, 102, 0.5);
+        }
+
+        .card-desc em {
+            color: #ffe082 !important;
+            font-style: italic;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 1);
+        }
+
+        /* Modo Alternativo Solar Desactivado (Contraste Puro Neutro) */
+        body.solar-off .scrolly-card {
+            background: rgba(5, 9, 18, 0.94) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.98) !important;
+        }
+
+        body.solar-off .card-title {
+            background: none !important;
+            -webkit-text-fill-color: #ffffff !important;
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px #000, 0 4px 14px #000 !important;
+        }
+
+        body.solar-off .card-desc {
+            color: #f8fbff !important;
+            text-shadow: 0 1px 4px #000, 0 2px 8px #000 !important;
+        }
+
+        .solar-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(8, 14, 26, 0.95);
+            border: 1.5px solid var(--accent-sun);
+            color: var(--accent-gold-light);
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.94rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.85), 0 0 25px rgba(255, 209, 102, 0.4);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .solar-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Caja de destacado de puerta semi-transparente */
+        .card-door-highlight {
+            background: linear-gradient(135deg, rgba(229, 205, 156, 0.22), rgba(139, 30, 43, 0.35));
+            border: 1px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 18px 0;
+            backdrop-filter: blur(6px);
+        }
+
+        .card-door-highlight i {
+            font-size: 1.9rem;
+            color: var(--accent-sun);
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.8));
+        }
+
+        .card-door-highlight strong {
+            display: block;
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 0.98rem;
+            margin-bottom: 3px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .card-door-highlight small {
+            color: #d6e2f0;
+            font-size: 0.84rem;
+            line-height: 1.4;
+            display: block;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Botones de acción de tarjetas */
+        .card-actions-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .btn-card-primary {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #ffd166, #962332);
+            color: #111;
+            border: 1px solid #fff;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.96rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 209, 102, 0.4);
+        }
+
+        .btn-card-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.15);
+            box-shadow: 0 10px 25px rgba(255, 209, 102, 0.6);
+        }
+
+        .btn-card-secondary {
+            background: rgba(8, 14, 26, 0.5);
+            color: var(--accent-gold-light);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(6px);
+        }
+
+        .btn-card-secondary:hover {
+            background: rgba(229, 205, 156, 0.25);
+            color: #fff;
+            border-color: var(--accent-gold);
+        }
+
+        /* Grilla de medidas y especificaciones semi-transparentes */
+        .specs-pill-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .spec-pill {
+            background: rgba(8, 14, 26, 0.45);
+            border: 1px solid var(--border-gold-soft);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            backdrop-filter: blur(6px);
+        }
+
+        .spec-pill:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-gold);
+            background: rgba(14, 22, 38, 0.6);
+        }
+
+        .spec-pill i {
+            font-size: 1.5rem;
+            color: var(--accent-sun);
+            width: 28px;
+            text-align: center;
+            filter: drop-shadow(0 0 6px rgba(255, 209, 102, 0.6));
+        }
+
+        .pill-label {
+            display: block;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .pill-val {
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            color: var(--accent-gold-light);
+            font-weight: 700;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+        }
+
+        .spec-pill small {
+            display: block;
+            font-size: 0.76rem;
+            color: #cadbee;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .location-info-box {
+            background: rgba(8, 14, 26, 0.45);
+            border-left: 3px solid var(--accent-sun);
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            margin: 14px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            backdrop-filter: blur(6px);
+        }
+
+        .location-info-box i {
+            color: var(--accent-sun);
+            font-size: 1.3rem;
+            margin-top: 3px;
+        }
+
+        .location-info-box strong {
+            display: block;
+            color: var(--accent-gold-light);
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .location-info-box p {
+            font-size: 0.88rem;
+            color: #e0ecf8;
+            line-height: 1.45;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Lista de características arquitectónicas (Etapa 3 - Lado Derecho) */
+        .arch-features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .arch-features-list li {
+            background: rgba(8, 14, 26, 0.45);
+            border: 1px solid var(--border-gold-soft);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            backdrop-filter: blur(6px);
+        }
+
+        .arch-features-list li i {
+            color: var(--accent-sun);
+            font-size: 1.25rem;
+            margin-top: 3px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .arch-features-list strong {
+            color: var(--accent-gold-light);
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: 0.94rem;
+            margin-bottom: 2px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .arch-features-list span {
+            color: #dbe7f4;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            display: block;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Indicador animado de scroll */
+        .scroll-down-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-gold-soft);
+            color: var(--accent-sun);
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .scroll-down-hint i {
+            animation: bounceDown 1.8s infinite;
+        }
+
+        @keyframes bounceDown {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(6px); }
+            60% { transform: translateY(3px); }
+        }
+
+        /* Hub de tarjetas finales (Etapa 4) */
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0 16px;
+            text-align: left;
+        }
+
+        .hub-card {
+            background: rgba(8, 14, 26, 0.48);
+            border: 1.5px solid var(--border-gold-soft);
+            border-radius: 14px;
+            padding: 20px 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            backdrop-filter: blur(8px);
+        }
+
+        .hub-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 12px 30px rgba(255, 209, 102, 0.25);
+            background: rgba(14, 22, 38, 0.65);
+        }
+
+        .hub-card i {
+            font-size: 2.2rem;
+            color: var(--accent-sun);
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.6));
+        }
+
+        .hub-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.12rem;
+            color: #fff;
+            margin-bottom: 6px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .hub-card p {
+            font-size: 0.85rem;
+            color: #c4d7ec;
+            line-height: 1.45;
+            margin-bottom: 16px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
+        }
+
+        .hub-card-btn {
+            background: rgba(229, 205, 156, 0.22);
+            color: var(--accent-gold-light);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* -------------------------------------------------------------
+           INDICADORES LATERALES DE ETAPAS (PAGINADOR DE SCROLL)
+        ------------------------------------------------------------- */
+        .scrolly-dots {
+            position: fixed;
+            right: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .scrolly-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1.5px solid var(--accent-gold);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .scrolly-dot.active {
+            background: var(--accent-sun);
+            transform: scale(1.35);
+            box-shadow: 0 0 12px var(--accent-sun);
+        }
+
+        .scrolly-dot::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(8, 14, 26, 0.85);
+            color: var(--accent-gold-light);
+            border: 1px solid var(--border-gold);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.74rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .scrolly-dot:hover::after {
+            opacity: 1;
+        }
+
+        /* -------------------------------------------------------------
+           MODAL DE FIGURAS 3D Y LEYENDAS (ZOMBIE Y SIMÓN PATIÑO)
+        ------------------------------------------------------------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeInModal 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-large-window {
+            background: var(--bg-modal);
+            border: 2px solid var(--accent-gold);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1050px;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), var(--shadow-glow);
+            padding: 26px 30px;
+            position: relative;
+        }
+
+        .modal-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-gold);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header-bar h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.55rem;
+            color: var(--accent-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close-cross {
+            background: transparent;
+            border: none;
+            color: var(--accent-gold);
+            font-size: 1.8rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .modal-close-cross:hover {
+            transform: scale(1.2);
+            color: #fff;
+        }
+
+        .figuras-tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .figura-tab-btn {
+            background: rgba(14, 20, 32, 0.85);
+            border: 1px solid var(--border-gold);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.92rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .figura-tab-btn.active {
+            background: var(--accent-gold);
+            color: #111;
+            font-weight: 700;
+        }
+
+        .figura-content-pane {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .figura-content-pane.active {
+            display: grid;
+        }
+
+        .figura-3d-box {
+            height: 380px;
+            background: radial-gradient(circle at 50% 50%, rgba(201, 166, 107, 0.12), rgba(0, 0, 0, 0.65));
+            border: 1px solid var(--border-gold-soft);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .figura-3d-box model-viewer {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        /* -------------------------------------------------------------
+           MODAL DE GALERÍA FOTOGRÁFICA
+        ------------------------------------------------------------- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-gold-soft);
+            cursor: pointer;
+            aspect-ratio: 4/3;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            border-color: var(--accent-gold);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(0deg, rgba(8, 12, 20, 0.95), transparent);
+            padding: 20px 12px 10px;
+            font-size: 0.85rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* -------------------------------------------------------------
+           MODAL DE AJUSTES MÓVILES Y RENDIMIENTO
+        ------------------------------------------------------------- */
+        .mobile-cfg-item {
+            background: rgba(14, 20, 32, 0.8);
+            border: 1px solid var(--border-gold-soft);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-cfg-info span {
+            display: block;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .mobile-cfg-info small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        /* -------------------------------------------------------------
+           PANEL FLOTANTE HUD STUDIO POST-FX
+        ------------------------------------------------------------- */
+        .btn-postfx-toggle {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 1100;
+            background: linear-gradient(135deg, rgba(255, 209, 102, 0.95), rgba(139, 30, 43, 0.95));
+            color: #111;
+            border: 2px solid var(--accent-gold-light);
+            border-radius: 30px;
+            padding: 9px 18px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+            transition: all 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-postfx-toggle:hover {
+            transform: scale(1.05) translateY(-2px);
+            filter: brightness(1.15);
+        }
+
+        .postfx-hud-panel {
+            position: fixed;
+            bottom: 74px;
+            right: 22px;
+            width: 320px;
+            background: rgba(8, 14, 26, 0.96);
+            border: 2px solid var(--accent-gold);
+            border-radius: 16px;
+            padding: 20px;
+            z-index: 1100;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(16px);
+            display: none;
+        }
+
+        .postfx-hud-panel.active {
+            display: block;
+            animation: fadeInHud 0.25s ease-out forwards;
+        }
+
+        @keyframes fadeInHud {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .postfx-switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+
+        .postfx-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #333;
+            transition: 0.3s;
+            border-radius: 20px;
+            border: 1px solid rgba(201, 166, 107, 0.4);
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: #fff;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .postfx-switch input:checked + .switch-slider {
+            background-color: var(--accent-sun);
+        }
+
+        .postfx-switch input:checked + .switch-slider:before {
+            transform: translateX(18px);
+            background-color: #111;
+        }
+
+        /* Lightbox modal */
+        .lightbox-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lightbox-modal.active {
+            display: flex;
+        }
+
+        .lightbox-modal img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border: 2px solid var(--accent-gold);
+            border-radius: 10px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: var(--accent-gold);
+            font-size: 2.5rem;
+            cursor: pointer;
+        }
+
+        /* -------------------------------------------------------------
+           RESPONSIVE DESIGN (TABLETS Y CELULARES CON AUTO-AJUSTE DINÁMICO)
+        ------------------------------------------------------------- */
+        @media (max-width: 960px) {
+            html, body {
+                min-height: 100dvh;
+            }
+
+            .navbar-top {
+                padding: 6px max(12px, env(safe-area-inset-right)) 6px max(12px, env(safe-area-inset-left));
+                height: auto;
+                min-height: 56px;
+                flex-wrap: nowrap;
+                gap: 8px;
+            }
+
+            .navbar-brand {
+                gap: 8px;
+                flex-shrink: 0;
+            }
+
+            .navbar-brand i {
+                font-size: 1.35rem;
+            }
+
+            .navbar-brand span {
+                font-size: 1.15rem;
+                letter-spacing: 0.5px;
+                white-space: nowrap;
+            }
+
+            .nav-menu {
+                display: flex;
+                gap: 4px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                max-width: 62%;
+                padding: 2px 0;
+            }
+
+            .nav-menu::-webkit-scrollbar {
+                display: none;
+            }
+
+            .nav-item button {
+                padding: 7px 10px;
+                font-size: 0.85rem;
+                border-radius: 8px;
+                white-space: nowrap;
+            }
+
+            .nav-item button span {
+                display: none;
+            }
+
+            .nav-item button i {
+                font-size: 0.95rem;
+                margin: 0;
+            }
+
+            /* Título Hero en Celular */
+            .scrolly-hero-title-overlay {
+                top: calc(64px + env(safe-area-inset-top, 0px));
+                width: 94%;
+            }
+
+            .scrolly-big-title {
+                font-size: clamp(1.4rem, 6.2vw, 2.2rem);
+                letter-spacing: clamp(1px, 0.5vw, 3px);
+                line-height: 1.15;
+                margin-bottom: 4px;
+            }
+
+            .scrolly-big-subtitle {
+                font-size: clamp(0.72rem, 3.2vw, 0.95rem);
+                letter-spacing: 1.5px;
+            }
+
+            .scrolly-gold-line {
+                width: 120px;
+                margin: 8px auto 0;
+            }
+
+            /* HUD flotante en Celular */
+            .scrolly-orbit-hud {
+                bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+                left: 10px;
+                gap: 6px;
+                flex-wrap: wrap;
+                max-width: 90%;
+            }
+
+            .orbit-badge {
+                padding: 5px 10px;
+                font-size: 0.74rem;
+                gap: 6px;
+            }
+
+            .orbit-hud-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 0.85rem;
+            }
+
+            /* Etapa Hero en Celular */
+            .step-hero-stage {
+                min-height: 94vh;
+                min-height: 94dvh;
+                padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .hero-stage-badge {
+                font-size: 0.78rem;
+                padding: 8px 14px;
+                text-align: center;
+                margin-bottom: 10px;
+                max-width: 92%;
+                line-height: 1.35;
+            }
+
+            .hero-scroll-invite {
+                font-size: 0.78rem;
+                padding: 8px 16px;
+                letter-spacing: 0.8px;
+                gap: 8px;
+            }
+
+            /* Pasos de scroll en celular: Espacio superior para el modelo 3D y tarjeta debajo */
+            .scrolly-step {
+                min-height: 100vh;
+                min-height: 100dvh;
+                padding: 42vh 14px 40px;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+            }
+
+            .scrolly-step.step-first {
+                padding-top: 40vh;
+            }
+
+            .scrolly-card {
+                width: 100%;
+                max-width: 480px;
+                padding: 20px 18px;
+                border-radius: 16px;
+                margin: 0 auto;
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+            }
+
+            .card-title {
+                font-size: 1.45rem;
+                line-height: 1.25;
+                margin-bottom: 10px;
+            }
+
+            .card-desc {
+                font-size: 0.94rem;
+                line-height: 1.6;
+                margin-bottom: 12px;
+            }
+
+            .card-badge {
+                font-size: 0.72rem;
+                padding: 4px 10px;
+                margin-bottom: 10px;
+            }
+
+            .specs-pill-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin: 12px 0;
+            }
+
+            .spec-pill {
+                padding: 10px 12px;
+                gap: 10px;
+            }
+
+            .spec-pill i {
+                font-size: 1.2rem;
+                width: 22px;
+            }
+
+            .spec-pill .pill-val {
+                font-size: 1rem;
+            }
+
+            .location-info-box {
+                padding: 10px 12px;
+                margin: 10px 0;
+            }
+
+            .arch-features-list {
+                gap: 8px;
+                margin: 12px 0;
+            }
+
+            .arch-features-list li {
+                padding: 10px 12px;
+            }
+
+            .card-actions-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn-card-primary, .btn-card-secondary {
+                width: 100%;
+                min-width: auto;
+                padding: 10px 14px;
+                font-size: 0.88rem;
+            }
+
+            .hub-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin: 16px 0 10px;
+            }
+
+            .hub-card {
+                padding: 14px 14px;
+            }
+
+            .hub-card i {
+                font-size: 1.6rem;
+                margin-bottom: 6px;
+            }
+
+            .hub-card h3 {
+                font-size: 0.98rem;
+            }
+
+            .hub-card p {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
+            }
+
+            .figura-content-pane {
+                grid-template-columns: 1fr;
+            }
+
+            .figura-3d-box {
+                height: 280px;
+            }
+
+            .scrolly-dots {
+                display: none;
+            }
+
+            /* Modales adaptados a pantallas de celulares */
+            .modal-overlay {
+                padding: 10px;
+            }
+
+            .modal-large-window {
+                padding: 18px 16px;
+                max-height: 94vh;
+                max-height: 94dvh;
+                border-radius: 16px;
+            }
+
+            .modal-header-bar h2 {
+                font-size: 1.2rem;
+            }
+
+            /* Ajustes para el Sol en móvil para que no estorbe */
+            .sun-corona {
+                width: 110px;
+                height: 110px;
+                top: 15px;
+                right: 8%;
+            }
+
+            .sunny-sky-lensflare {
+                width: 400px;
+                height: 400px;
+                top: -50px;
+                right: -20px;
+            }
+
+            .solar-toast {
+                bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+                right: 12px;
+                left: 12px;
+                font-size: 0.84rem;
+                padding: 10px 14px;
+            }
+        }
+    </style>
+</head>
+<body class="solar-active">
+
+    <!-- =============================================================
+         TRANSICIÓN CARTOON BLINK
+    ============================================================= -->
+    <div id="cartoonBlinkOverlay" class="cartoon-blink-overlay blink-open">
+        <div class="cartoon-eyelid eyelid-top"></div>
+        <div class="cartoon-eyelid eyelid-bottom"></div>
+    </div>
+
+    <!-- =============================================================
+         AMBIENTE DE DÍA SOLEADO: RESPLANDOR Y LENSFLARE
+    ============================================================= -->
+    <div class="sun-corona" onclick="toggleSolarSynthesis()" title="Pulsa el Sol para cambiar la síntesis de iluminación con las letras"></div>
+    <div class="sunny-sky-lensflare"></div>
+
+    <!-- =============================================================
+         CAPAS DE POSTPROCESAMIENTO WEB DE LA PÁGINA
+    ============================================================= -->
+    <div class="post-processing-container">
+        <div class="postfx-vignette" id="fxVignette"></div>
+        <div class="postfx-grain" id="fxGrain"></div>
+        <div class="postfx-bloom" id="fxBloom"></div>
+        <div class="postfx-chromatic" id="fxChromatic"></div>
+    </div>
+
+    <!-- =============================================================
+         NAVBAR FIJA SUPERIOR
+    ============================================================= -->
+    <header class="navbar-top">
+        <div class="navbar-brand" onclick="scrollToStep('hero')">
+            <i class="fa-solid fa-masks-theater"></i>
+            <span>Teatro 31 de Octubre</span>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <button type="button" onclick="scrollToStep('hero')" title="Inicio & Teatro 3D Solo">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Inicio</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" onclick="scrollToStep(1)" title="Reseña Histórica">
+                        <i class="fa-solid fa-landmark"></i>
+                        <span>Reseña</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" onclick="scrollToStep(2)" title="Dimensiones y Muros">
+                        <i class="fa-solid fa-ruler-combined"></i>
+                        <span>Medidas</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" onclick="scrollToStep(3)" title="Lado Derecho del Modelo 3D">
+                        <i class="fa-solid fa-cube"></i>
+                        <span>Lado Derecho</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn-interiores-nav" onclick="transitionToInteriores()" title="Entrar al Interior del Teatro">
+                        <i class="fa-solid fa-door-open"></i>
+                        <span>Interiores 3D</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn-solar-nav" id="btnSolarToggle" onclick="toggleSolarSynthesis()" title="Alternar Síntesis de Luz Solar y Contraste de Letras">
+                        <i class="fa-solid fa-sun" style="color:var(--accent-sun);"></i>
+                        <span>Luz Solar: Síntesis</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" onclick="openModal('modalGaleria')" title="Galería de Fotos">
+                        <i class="fa-solid fa-images"></i>
+                        <span>Galería</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" onclick="openModal('modalFiguras')" title="Personajes y Leyendas 3D">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                        <span>Figuras 3D</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn-bgm-nav" id="btnBgmToggle" onclick="toggleBgm()" title="Música Ambiental">
+                        <i class="fa-solid fa-volume-xmark" id="bgmIcon"></i>
+                        <span>Música</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" onclick="openModal('modalMobileConfig')" title="Configuración Móvil">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        <span>Celular</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Audio de Fondo (Sangre de Cóndor) -->
+    <audio id="bgmAudio" src="audio/sangre de condor.mpeg" loop preload="none"></audio>
+
+    <!-- =============================================================
+         ESCENA 3D FIJA DE FONDO TOTAL: TEATRO5.GLB (MÁS GRANDE & SOLEADO)
+    ============================================================= -->
+    <div class="scrolly-bg-container">
+        <!-- Título monumental que aparece de fondo total en la primera etapa -->
+        <div class="scrolly-hero-title-overlay" id="heroTitleOverlay">
+            <h1 class="scrolly-big-title">TEATRO 31 DE OCTUBRE</h1>
+            <p class="scrolly-big-subtitle">Llallagua &bull; Siglo XX &bull; Potosí &bull; Bolivia</p>
+            <div class="scrolly-gold-line"></div>
+        </div>
+
+        <!-- Visor 3D de Fondo Total: Modelo más grande, iluminación soleada y post-procesamiento -->
+        <model-viewer
+            id="mvTeatroHero"
+            src="Teatro5.glb"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            touch-action="pan-y"
+            tone-mapping="neutral"
+            shadow-intensity="1.95"
+            shadow-softness="0.25"
+            exposure="1.42"
+            camera-orbit="0deg 75deg 1.62m"
+            min-camera-orbit="auto 25deg 1.0m"
+            max-camera-orbit="auto 100deg 3.5m"
+            camera-target="0m 0.08m 0m"
+            interpolation-decay="80"
+            rotation-per-second="28deg"
+            alt="Modelo 3D del Teatro 31 de Octubre">
+
+            <!-- =============================================================
+                 BOTÓN UBICADO FRENTE A LA PUERTA DEL TEATRO5.GLB
+                 (Slot Hotspot en model-viewer conectado a interiores_T.html)
+            ============================================================= -->
+            <button class="door-hotspot" slot="hotspot-door"
+                data-position="0m 0.04m 0.65m"
+                data-normal="0m 0m 1m"
+                onclick="transitionToInteriores()"
+                title="Presiona la puerta para entrar al interior del Teatro 31 de Octubre">
+                <div class="door-hotspot-pin">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div class="door-hotspot-label">
+                    <span>Puerta Principal</span>
+                    <strong>Entrar al Interior 3D</strong>
+                </div>
+            </button>
+
+            <!-- =============================================================
+                 POST-PROCESAMIENTO WEB INTERNO (SHADERS 3D BLOOM & ACES TONEMAP)
+            ============================================================= -->
+            <effect-composer id="composerHero" render-mode="quality">
+                <!-- Resplandor solar en piedra labrada -->
+                <bloom-effect id="bloomHero" strength="0.7" threshold="0.82" radius="0.55"></bloom-effect>
+                <!-- Gradación de color para día soleado brillante andino -->
+                <color-grade-effect tonemapping="aces_filmic" brightness="1.06" contrast="1.12" saturation="1.18"></color-grade-effect>
+            </effect-composer>
+        </model-viewer>
+
+        <!-- Indicador de orientación en tiempo real y controles rápidos de vista -->
+        <div class="scrolly-orbit-hud">
+            <div class="orbit-badge" id="scrollyAngleBadge">
+                <i class="fa-solid fa-compass"></i> Fachada Monumental (0°)
+            </div>
+            <button class="orbit-hud-btn" onclick="resetToFrontCamera()" title="Restablecer Vista Frontal (Inicio Solo)">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <button class="orbit-hud-btn" id="btnToggleAutoRotate" onclick="toggleHeroAutoRotate()" title="Alternar Giro Continuo 360°">
+                <i class="fa-solid fa-repeat"></i>
+            </button>
+            <button class="orbit-hud-btn" id="btnSolarSynthesisHud" onclick="toggleSolarSynthesis()" title="Luz Solar & Síntesis de Letras">
+                <i class="fa-solid fa-sun" style="color:var(--accent-sun);"></i>
+            </button>
+            <button class="orbit-hud-btn" onclick="triggerAR('mvTeatroHero')" title="Ver en Realidad Aumentada (AR)">
+                <i class="fa-solid fa-cube"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Indicadores de Etapa en el borde derecho -->
+    <div class="scrolly-dots">
+        <div class="scrolly-dot active" data-tooltip="Inicio: Teatro 3D Solo" onclick="scrollToStep('hero')"></div>
+        <div class="scrolly-dot" data-tooltip="1. Fachada & Reseña" onclick="scrollToStep(1)"></div>
+        <div class="scrolly-dot" data-tooltip="2. Medidas & Muros" onclick="scrollToStep(2)"></div>
+        <div class="scrolly-dot" data-tooltip="3. Lado Derecho 3D" onclick="scrollToStep(3)"></div>
+        <div class="scrolly-dot" data-tooltip="4. Exploración & Acceso" onclick="scrollToStep(4)"></div>
+    </div>
+
+    <!-- =============================================================
+         PISTA DE SCROLLYTELLING: ROTACIÓN ÁGIL Y CUADROS SEMI-TRANSPARENTES
+    ============================================================= -->
+    <div class="scrolly-scroll-track">
+
+        <!-- =========================================================
+             ETAPA HERO (INICIO): EL TEATRO 3D APARECE SOLO, GRANDE Y MAJESTUOSO
+             (Sin cuadros de texto que lo tapen - Solo el modelo 3D y su título)
+        ========================================================= -->
+        <section class="scrolly-step step-hero-stage" id="step-hero">
+            <div class="hero-stage-badge">
+                <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                <span>Gira libremente el Teatro 3D en 360° &bull; Desliza hacia abajo para recorrerlo</span>
+            </div>
+            <div class="hero-scroll-invite" onclick="scrollToStep(1)">
+                <div class="hero-mouse-pill">
+                    <div class="hero-mouse-wheel"></div>
+                </div>
+                <span>Baja para recorrer la historia, medidas y muros</span>
+                <i class="fa-solid fa-angles-down cue-bounce"></i>
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------------
+             ETAPA 1: FACHADA MONUMENTAL Y RESEÑA HISTÓRICA
+        --------------------------------------------------------- -->
+        <section class="scrolly-step step-first" id="step-0">
+            <div class="scrolly-card card-left">
+                <div class="card-badge">
+                    <i class="fa-solid fa-landmark"></i> Etapa 1 &bull; Fachada Monumental
+                </div>
+                <h2 class="card-title">Reseña Histórica</h2>
+                <p class="card-desc">
+                    El <strong>Teatro 31 de Octubre</strong> de Llallagua es una monumental edificación levantada a base de rocas y piedras canteadas a mano a mediados del siglo XX en el corazón minero de Potosí, Bolivia.
+                </p>
+                <p class="card-desc">
+                    Construido bajo el patrocinio empresarial de <strong>Simón I. Patiño</strong> en la época dorada de la minería del estaño, este recinto se erigió como el palacio cultural, cívico y cinematográfico para los miles de obreros de la mina <em>La Salvadora</em> y la población de Siglo XX.
+                </p>
+
+                <!-- Caja de ingreso frente a la puerta -->
+                <div class="card-door-highlight">
+                    <i class="fa-solid fa-door-open"></i>
+                    <div>
+                        <strong>Puerta Principal Interactiva</strong>
+                        <small>Pulsa el botón flotante en la puerta del modelo 3D o el botón inferior para explorar el interior y exterior en 3D.</small>
+                    </div>
+                </div>
+
+                <div class="card-actions-row">
+                    <button class="btn-card-primary" onclick="transitionToInteriores()">
+                        <i class="fa-solid fa-door-open"></i> Entrar al Interior en 3D
+                    </button>
+                    <button class="btn-card-secondary" onclick="openModal('modalGaleria')">
+                        <i class="fa-solid fa-images"></i> Galería de Fotos
+                    </button>
+                </div>
+
+                <div class="scroll-down-hint" onclick="scrollToStep(2)" style="cursor: pointer;" title="Bajar a Medidas y Muros">
+                    <span>Baja para girar el teatro y ver medidas de muros</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------------
+             ETAPA 1: DIMENSIONES, ALTURA DE MUROS Y UBICACIÓN
+        --------------------------------------------------------- -->
+        <section class="scrolly-step" id="step-1">
+            <div class="scrolly-card card-right">
+                <div class="card-badge">
+                    <i class="fa-solid fa-ruler-combined"></i> Etapa 2 &bull; Medidas & Ubicación
+                </div>
+                <h2 class="card-title">Dimensiones, Muros y Ubicación</h2>
+                <p class="card-desc">
+                    
+                </p>
+
+                <!-- Grilla de Medidas -->
+                <div class="specs-pill-grid">
+                    <div class="spec-pill">
+                        <i class="fa-solid fa-arrows-up-down"></i>
+                        <div>
+                            <span class="pill-label">Altura de Muros</span>
+                            <strong class="pill-val">~15 Metros</strong>
+                            <small>Frontis monumental y nave</small>
+                        </div>
+                    </div>
+                    <div class="spec-pill">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div>
+                            <span class="pill-label">Grosor de Muros</span>
+                            <strong class="pill-val">60 a 80 cm</strong>
+                            <small>Piedra andesítica maciza</small>
+                        </div>
+                    </div>
+                    <div class="spec-pill">
+                        <i class="fa-solid fa-vector-square"></i>
+                        <div>
+                            <span class="pill-label">Superficie Total</span>
+                            <strong class="pill-val">> 850 m²</strong>
+                            <small>Platea, palcos y mezzanine</small>
+                        </div>
+                    </div>
+                    <div class="spec-pill">
+                        <i class="fa-solid fa-users"></i>
+                        <div>
+                            <span class="pill-label">Capacidad de Aforo</span>
+                            <strong class="pill-val">+500 Butacas</strong>
+                            <small>Público en dos niveles</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicación Geográfica -->
+                <div class="location-info-box">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div>
+                        <strong>¿Dónde queda ubicado?</strong>
+                        <p>
+                            Calle 31 de Octubre, centro histórico de Siglo XX, Municipio de <strong>Llallagua</strong>, Provincia Rafael Bustillo, Departamento de <strong>Potosí, Bolivia</strong>.
+                            Elevado a una altitud de <strong>~3,890 msnm</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="scroll-down-hint" onclick="scrollToStep(3)" style="cursor: pointer;" title="Bajar a Lado Derecho">
+                    <span>Baja de nuevo para girar al lado derecho del modelo 3D</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------------
+             ETAPA 2: GIRO HACIA EL LADO DERECHO DEL MODELO 3D
+        --------------------------------------------------------- -->
+        <section class="scrolly-step" id="step-2">
+            <div class="scrolly-card card-left">
+                <div class="card-badge">
+                    <i class="fa-solid fa-cube"></i> Etapa 3 &bull; Perfil Lateral Derecho
+                </div>
+                <h2 class="card-title">Lado Derecho del Modelo 3D</h2>
+                <p class="card-desc">
+                    Al volver a bajar, el teatro <strong>gira hacia el lado derecho</strong> mostrando la fachada lateral del modelo 3D. Aquí se aprecia la profundidad arquitectónica y los detalles constructivos de la nave.
+                </p>
+
+                <!-- Características Arquitectónicas del Lado Derecho -->
+                <ul class="arch-features-list">
+                    <li>
+                        <i class="fa-solid fa-grip-lines-vertical"></i>
+                        <div>
+                            <strong>Ventanales Longitudinales:</strong>
+                            <span>Ubicados a lo largo de este muro derecho, iluminaban con luz natural los corredores de circulación y la galería alta.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-cubes"></i>
+                        <div>
+                            <strong>Contrafuertes y Cantería:</strong>
+                            <span>Los sillares de roca volcánica resisten el empuje de la estructura y aíslan térmicamente del gélido clima del altiplano.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-volume-high"></i>
+                        <div>
+                            <strong>Acústica Minera:</strong>
+                            <span>La solidez de los muros laterales confina el sonido generando una resonancia envolvente sin reverberaciones parásitas.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-warehouse"></i>
+                        <div>
+                            <strong>Cubierta y Cerchas:</strong>
+                            <span>Techo a dos aguas con estructura mixta de acero y tirantes de madera reforzada para rápida evacuación pluvial.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="scroll-down-hint" onclick="scrollToStep(4)" style="cursor: pointer;" title="Bajar a Exploración 360°">
+                    <span>Baja para exploración 360°, galería y recorrido interior</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------------
+             ETAPA 3: EXPLORACIÓN LIBRE, GALERÍA Y ACCESO TOTAL
+        --------------------------------------------------------- -->
+        <section class="scrolly-step" id="step-3">
+            <div class="scrolly-card card-center">
+                <div class="card-badge">
+                    <i class="fa-solid fa-arrows-spin"></i> Etapa 4 &bull; Exploración 360° & Acceso Total
+                </div>
+                <h2 class="card-title">Explora el Teatro 31 de Octubre</h2>
+                <p class="card-desc">
+                    El modelo 3D está ahora completamente desbloqueado para interactuar libremente: arrastra con el ratón o desliza con el dedo para girarlo en 360°, o adéntrate directamente al recorrido interior.
+                </p>
+
+                <!-- Hub de Acciones -->
+                <div class="hub-grid">
+                    <div class="hub-card" onclick="transitionToInteriores()">
+                        <div>
+                            <i class="fa-solid fa-door-open"></i>
+                            <h3>Recorrido Interior 3D</h3>
+                            <p>Recorre en primera persona el hall, butacas, escenario, camerinos y cuadros de arte histórico.</p>
+                        </div>
+                        <div class="hub-card-btn">
+                            <span>Entrar al Teatro</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="hub-card" onclick="openModal('modalGaleria')">
+                        <div>
+                            <i class="fa-solid fa-images"></i>
+                            <h3>Galería Fotográfica</h3>
+                            <p>Fotografías reales de la fachada de piedra, laterales, escenario e ingreso del monumento.</p>
+                        </div>
+                        <div class="hub-card-btn">
+                            <span>Ver Fotos</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="hub-card" onclick="openModal('modalFiguras')">
+                        <div>
+                            <i class="fa-solid fa-users-viewfinder"></i>
+                            <h3>Figuras 3D & Historia</h3>
+                            <p>Examina los modelos 3D interactivos de Simón I. Patiño y las leyendas de los socavones mineros.</p>
+                        </div>
+                        <div class="hub-card-btn">
+                            <span>Ver Modelos</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-actions-row" style="justify-content: center; margin-top: 14px;">
+                    <button class="btn-card-secondary" onclick="scrollToStep('hero')">
+                        <i class="fa-solid fa-arrow-up"></i> Volver a la Fachada Frontal (Inicio Solo)
+                    </button>
+                    <button class="btn-card-primary" onclick="transitionToInteriores()">
+                        <i class="fa-solid fa-door-open"></i> Entrar a Interiores (interiores_T.html)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- =============================================================
+         MODAL: FIGURAS 3D (SIMÓN PATIÑO & LEYENDAS MINERAS ZOMBIE)
+    ============================================================= -->
+    <div id="modalFiguras" class="modal-overlay">
+        <div class="modal-large-window">
+            <div class="modal-header-bar">
+                <h2><i class="fa-solid fa-users-viewfinder" style="color:var(--accent-gold)"></i> Personajes & Modelos 3D</h2>
+                <button class="modal-close-cross" onclick="closeModal('modalFiguras')">&times;</button>
+            </div>
+
+            <!-- Selector de Figuras -->
+            <div class="figuras-tab-nav">
+                <button class="figura-tab-btn active" id="btnTabSimon" onclick="switchFiguraTab('simon')">
+                    <i class="fa-solid fa-crown"></i> Simón I. Patiño
+                </button>
+                <button class="figura-tab-btn" id="btnTabZombie" onclick="switchFiguraTab('zombie')">
+                    <i class="fa-solid fa-skull"></i> Leyenda Minera
+                </button>
+            </div>
+
+            <!-- Panel 1: Simón I. Patiño -->
+            <div class="figura-content-pane active" id="paneSimon">
+                <div class="figura-3d-box">
+                    <model-viewer
+                        id="mvSimon"
+                        src="simon2.glb"
+                        camera-controls
+                        auto-rotate
+                        shadow-intensity="1.2"
+                        exposure="1.1"
+                        camera-orbit="0deg 80deg 3.5m"
+                        alt="Simón I. Patiño 3D">
+                    </model-viewer>
+                </div>
+                <div>
+                    <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold-light); font-size:1.6rem; margin-bottom:8px;">
+                        Simón Iturri Patiño (1860 &ndash; 1947)
+                    </h3>
+                    <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:12px;">
+                        <em>El Rey del Estaño &bull; Fundador del emporio minero de Siglo XX y Llallagua</em>
+                    </p>
+                    <p style="font-size:0.95rem; color:#d0dfea; margin-bottom:14px; line-height:1.6;">
+                        Tras descubrir la legendaria veta de estaño de la mina <strong>La Salvadora</strong> en el cerro Juan del Valle, Patiño consolidó el emporio <em>Patiño Mines</em>. Con el fin de brindar bienestar cívico, artístico y social a los miles de mineros, financió la construcción del monumental <strong>Teatro 31 de Octubre</strong>.
+                    </p>
+                    <div class="specs-pill-grid" style="margin-bottom: 0;">
+                        <div class="spec-pill">
+                            <i class="fa-solid fa-calendar"></i>
+                            <div>
+                                <span class="pill-label">Época</span>
+                                <strong class="pill-val">Siglo XX</strong>
+                            </div>
+                        </div>
+                        <div class="spec-pill">
+                            <i class="fa-solid fa-gem"></i>
+                            <div>
+                                <span class="pill-label">Mina</span>
+                                <strong class="pill-val">La Salvadora</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Zombie / Leyenda Minera -->
+            <div class="figura-content-pane" id="paneZombie">
+                <div class="figura-3d-box">
+                    <model-viewer
+                        id="mvZombie"
+                        src="Zombie.glb"
+                        camera-controls
+                        auto-rotate
+                        shadow-intensity="1.2"
+                        exposure="1.1"
+                        camera-orbit="0deg 75deg 3.5m"
+                        alt="Figura de Leyenda Minera">
+                    </model-viewer>
+                </div>
+                <div>
+                    <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold-light); font-size:1.6rem; margin-bottom:8px;">
+                        Leyendas de los Socavones
+                    </h3>
+                    <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:12px;">
+                        <em>Mitos, almas del Tío de la Mina y relatos de las noches mineras</em>
+                    </p>
+                    <p style="font-size:0.95rem; color:#d0dfea; margin-bottom:14px; line-height:1.6;">
+                        Cuentan las leyendas de Llallagua que al concluir las funciones cinematográficas y apagarse las luces del Teatro 31 de Octubre, las presencias y misterios de las profundidades de los socavones salían a recorrer las butacas de madera maciza y el proscenio de piedra.
+                    </p>
+                    <div class="specs-pill-grid" style="margin-bottom: 0;">
+                        <div class="spec-pill">
+                            <i class="fa-solid fa-mask"></i>
+                            <div>
+                                <span class="pill-label">Tradición</span>
+                                <strong class="pill-val">Mito Minero</strong>
+                            </div>
+                        </div>
+                        <div class="spec-pill">
+                            <i class="fa-solid fa-mountain"></i>
+                            <div>
+                                <span class="pill-label">Origen</span>
+                                <strong class="pill-val">Siglo XX, Potosí</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================================
+         MODAL: GALERÍA FOTOGRÁFICA
+    ============================================================= -->
+    <div id="modalGaleria" class="modal-overlay">
+        <div class="modal-large-window">
+            <div class="modal-header-bar">
+                <h2><i class="fa-solid fa-images" style="color:var(--accent-gold)"></i> Galería Fotográfica del Teatro 31 de Octubre</h2>
+                <button class="modal-close-cross" onclick="closeModal('modalGaleria')">&times;</button>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:16px;">
+                Colección de registros fotográficos de la fachada monumental de piedra, accesos, laterales y escenario.
+            </p>
+
+            <div class="gallery-grid">
+                <div class="gallery-item" onclick="openLightbox('imagenes/frentte1.jpg')">
+                    <img src="imagenes/frentte1.jpg" alt="Fachada Frontal 1">
+                    <div class="gallery-item-caption"><i class="fa-solid fa-camera"></i> Fachada Principal Monumental</div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox('imagenes/frente2.jpg')">
+                    <img src="imagenes/frente2.jpg" alt="Fachada Frontal 2">
+                    <div class="gallery-item-caption"><i class="fa-solid fa-door-open"></i> Frontis e Ingreso de Piedra</div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox('imagenes/ecenario.jpg')">
+                    <img src="imagenes/ecenario.jpg" alt="Escenario e Interiores">
+                    <div class="gallery-item-caption"><i class="fa-solid fa-masks-theater"></i> Escenario y Platea de Butacas</div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox('imagenes/derecha.jpg')">
+                    <img src="imagenes/derecha.jpg" alt="Lateral Derecho">
+                    <div class="gallery-item-caption"><i class="fa-solid fa-cube"></i> Fachada Lateral Derecha</div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox('imagenes/izquierda.jpg')">
+                    <img src="imagenes/izquierda.jpg" alt="Lateral Izquierdo">
+                    <div class="gallery-item-caption"><i class="fa-solid fa-building"></i> Fachada Lateral Izquierda</div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox('imagenes/atras.jpg')">
+                    <img src="imagenes/atras.jpg" alt="Vista Trasera">
+                    <div class="gallery-item-caption"><i class="fa-solid fa-archway"></i> Vista Posterior del Edificio</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================================
+         MODAL: CONFIGURACIÓN PARA CELULARES
+    ============================================================= -->
+    <div id="modalMobileConfig" class="modal-overlay">
+        <div class="modal-large-window" style="max-width: 600px;">
+            <div class="modal-header-bar">
+                <h2><i class="fa-solid fa-mobile-screen-button" style="color:var(--accent-gold)"></i> Ajustes para Celulares</h2>
+                <button class="modal-close-cross" onclick="closeModal('modalMobileConfig')">&times;</button>
+            </div>
+
+            <div class="mobile-cfg-item">
+                <div class="mobile-cfg-info">
+                    <span>Modo Ahorro / Fluidez Móvil</span>
+                    <small>Desactiva grano pesado para optimizar la batería y evitar recalentamiento.</small>
+                </div>
+                <label class="postfx-switch">
+                    <input type="checkbox" id="chkMobilePerf" onchange="toggleMobilePerformance(this.checked)">
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+
+            <div class="mobile-cfg-item">
+                <div class="mobile-cfg-info">
+                    <span>Desplazamiento Táctil Seguro (pan-y)</span>
+                    <small>Permite scrollear con el dedo sin que el visor 3D bloquee la pantalla.</small>
+                </div>
+                <label class="postfx-switch">
+                    <input type="checkbox" id="chkMobilePan" checked onchange="toggleMobilePan(this.checked)">
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+
+            <div class="mobile-cfg-item">
+                <div class="mobile-cfg-info">
+                    <span>Control por Giroscopio Móvil</span>
+                    <small>Inclina tu celular para rotar los modelos en 3D mediante los sensores del teléfono.</small>
+                </div>
+                <label class="postfx-switch">
+                    <input type="checkbox" id="chkMobileGyro" onchange="toggleMobileGyro(this.checked)">
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+
+            <button class="btn-card-primary" style="width:100%; margin-top:16px;" onclick="closeModal('modalMobileConfig')">
+                <i class="fa-solid fa-check"></i> Aplicar Ajustes
+            </button>
+        </div>
+    </div>
+
+    <!-- =============================================================
+         MODAL: LIGHTBOX PARA IMÁGENES AMPLIADAS
+    ============================================================= -->
+    <div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightboxImg" src="" alt="Vista ampliada">
+    </div>
+
+    <!-- =============================================================
+         PANEL FLOTANTE HUD STUDIO POST-FX
+    ============================================================= -->
+    <button class="btn-postfx-toggle" onclick="togglePostFxPanel()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Post-FX</span>
+    </button>
+
+    <div id="postFxHudPanel" class="postfx-hud-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-gold-soft); padding-bottom:8px;">
+            <h4 style="font-family:'Cinzel',serif; color:var(--accent-gold-light); font-size:1rem;">
+                <i class="fa-solid fa-sliders"></i> Shaders Post-FX
+            </h4>
+            <button onclick="togglePostFxPanel()" style="background:none; border:none; color:var(--accent-gold); font-size:1.2rem; cursor:pointer;">&times;</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <label style="font-size:0.85rem; color:#ddd;"><i class="fa-solid fa-circle-dot"></i> Viñeteado Lente</label>
+            <label class="postfx-switch">
+                <input type="checkbox" id="chkFxVignette" checked onchange="togglePostEffect('vignette', this.checked)">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <label style="font-size:0.85rem; color:#ddd;"><i class="fa-solid fa-film"></i> Grano 35mm</label>
+            <label class="postfx-switch">
+                <input type="checkbox" id="chkFxGrain" checked onchange="togglePostEffect('grain', this.checked)">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <label style="font-size:0.85rem; color:#ddd;"><i class="fa-solid fa-sun"></i> Bloom Solar</label>
+            <label class="postfx-switch">
+                <input type="checkbox" id="chkFxBloom" checked onchange="togglePostEffect('bloom', this.checked)">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <label style="font-size:0.85rem; color:#ddd;"><i class="fa-solid fa-palette"></i> Aberración Óptica</label>
+            <label class="postfx-switch">
+                <input type="checkbox" id="chkFxChromatic" checked onchange="togglePostEffect('chromatic', this.checked)">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- =============================================================
+         SCRIPTS: SCROLLYTELLING 3D ÁGIL, CÁMARAS, AUDIO Y TRANSICIONES
+    ============================================================= -->
+    <script>
+        /* -------------------------------------------------------------
+           SCROLLYTELLING: ROTACIÓN CONTINUA, DESPLAZAMIENTO LATERAL Y SÍNTESIS SOLAR
+        ------------------------------------------------------------- */
+        const mvHero = document.getElementById('mvTeatroHero');
+        const heroTitleOverlay = document.getElementById('heroTitleOverlay');
+        const angleBadge = document.getElementById('scrollyAngleBadge');
+        const dots = document.querySelectorAll('.scrolly-dot');
+
+        // Valores de cámara optimizados para modelo más grande (1.62m de radio)
+        let targetTheta = 0;
+        let targetPhi = 75;
+        let targetRadius = 1.62;
+
+        let currentTheta = 0;
+        let currentPhi = 75;
+        let currentRadius = 1.62;
+
+        // Variables de posicionamiento dinámico: encogimiento y viaje lateral
+        let targetX = 0;
+        let targetY = 0;
+        let targetScale = 1.0;
+
+        let currentX = 0;
+        let currentY = 0;
+        let currentScale = 1.0;
+
+        let isUserDragging = false;
+        let isHeroAutoRotating = false;
+        let dragTimeout = null;
+        let isSolarSynthesisActive = true;
+
+        // Detección de interacción manual del usuario en el visor 3D
+        if (mvHero) {
+            mvHero.addEventListener('pointerdown', () => {
+                isUserDragging = true;
+                if (dragTimeout) clearTimeout(dragTimeout);
+            });
+
+            window.addEventListener('pointerup', () => {
+                if (isUserDragging) {
+                    dragTimeout = setTimeout(() => {
+                        isUserDragging = false;
+                    }, 1000);
+                }
+            });
+        }
+
+        // Función de interpolación suave
+        function lerp(start, end, t) {
+            return start + (end - start) * t;
+        }
+
+        // Función de aceleración suave (ease-in-out)
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        }
+
+        // Cálculo de cámara y posición según scroll
+        function updateScrollyCamera() {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const windowWidth = window.innerWidth;
+            const isDesktop = windowWidth >= 992;
+            const maxScroll = document.documentElement.scrollHeight - windowHeight;
+            if (maxScroll <= 0) return;
+
+            // Desvanecer el título gigante en el Hero al comenzar a scrollear
+            if (heroTitleOverlay) {
+                const titleOpacity = Math.max(0, 1 - (scrollY / (windowHeight * 0.42)));
+                heroTitleOverlay.style.opacity = titleOpacity;
+                heroTitleOverlay.style.transform = `translateX(-50%) translateY(-${(1 - titleOpacity) * 35}px)`;
+                heroTitleOverlay.style.pointerEvents = titleOpacity > 0.1 ? 'auto' : 'none';
+            }
+
+            // Elementos de referencia
+            const stepHero = document.getElementById('step-hero');
+            const step0 = document.getElementById('step-0'); // Reseña (Left)
+            const step1 = document.getElementById('step-1'); // Medidas (Right)
+            const step2 = document.getElementById('step-2'); // Lado Derecho (Left)
+            const step3 = document.getElementById('step-3'); // Exploración (Center)
+
+            // Puntos de transición según offsets
+            const pHero = 0;
+            const p0 = step0 ? step0.offsetTop - 80 : windowHeight;
+            const p1 = step1 ? step1.offsetTop - 80 : windowHeight * 2;
+            const p2 = step2 ? step2.offsetTop - 80 : windowHeight * 3;
+            const p3 = step3 ? step3.offsetTop - 80 : windowHeight * 4;
+
+            let activeIndex = 0;
+
+            if (!isUserDragging && !isHeroAutoRotating) {
+                if (scrollY <= p0) {
+                    // HERO -> STEP 0: De inicio solitario hacia Reseña Histórica
+                    // En Hero (scrollY=0): El teatro aparece SOLO, grande (scale 1.0) y centrado.
+                    // Al scrollear: Se empequeñece a 0.72 y viaja a la DERECHA (+23vw) donde NO está el texto.
+                    const t = easeInOutQuad(Math.min(1, Math.max(0, scrollY / Math.max(1, p0))));
+                    targetTheta = lerp(0, 6, t);
+                    targetPhi = lerp(75, 74, t);
+                    targetRadius = lerp(1.62, 1.65, t);
+
+                    if (isDesktop) {
+                        targetX = lerp(0, windowWidth * 0.23, t);
+                        targetY = 0;
+                        targetScale = lerp(1.0, 0.72, t);
+                    } else {
+                        targetX = 0;
+                        targetY = lerp(0, -windowHeight * 0.20, t);
+                        targetScale = lerp(1.0, 0.60, t);
+                    }
+
+                    if (t < 0.45) {
+                        activeIndex = 0;
+                        if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-landmark"></i> Inicio: Fachada Monumental (0°)`;
+                    } else {
+                        activeIndex = 1;
+                        if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-landmark"></i> Fachada & Reseña (6°)`;
+                    }
+                } else if (scrollY <= p1) {
+                    // STEP 0 -> STEP 1: De Reseña (texto a la izquierda) a Medidas (texto a la DERECHA)
+                    // El teatro viaja de la DERECHA (+23vw) a la IZQUIERDA (-23vw) donde NO está el texto.
+                    const t = easeInOutQuad(Math.min(1, Math.max(0, (scrollY - p0) / Math.max(1, (p1 - p0)))));
+                    targetTheta = lerp(6, 42, t);
+                    targetPhi = lerp(74, 66, t);
+                    targetRadius = lerp(1.65, 1.74, t);
+
+                    if (isDesktop) {
+                        targetX = lerp(windowWidth * 0.23, -windowWidth * 0.23, t);
+                        targetY = 0;
+                        targetScale = 0.72;
+                    } else {
+                        targetX = 0;
+                        targetY = -windowHeight * 0.20;
+                        targetScale = 0.60;
+                    }
+
+                    if (t < 0.5) {
+                        activeIndex = 1;
+                        if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-landmark"></i> Fachada & Reseña (6°)`;
+                    } else {
+                        activeIndex = 2;
+                        if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-ruler-combined"></i> Muros & Medidas (42°)`;
+                    }
+                } else if (scrollY <= p2) {
+                    // STEP 1 -> STEP 2: De Medidas (texto derecha) a Lado Derecho (texto IZQUIERDA)
+                    // El teatro viaja de la IZQUIERDA (-23vw) a la DERECHA (+23vw) donde NO está el texto.
+                    const t = easeInOutQuad(Math.min(1, Math.max(0, (scrollY - p1) / Math.max(1, (p2 - p1)))));
+                    targetTheta = lerp(42, 90, t);
+                    targetPhi = lerp(66, 75, t);
+                    targetRadius = lerp(1.74, 1.66, t);
+
+                    if (isDesktop) {
+                        targetX = lerp(-windowWidth * 0.23, windowWidth * 0.23, t);
+                        targetY = 0;
+                        targetScale = 0.72;
+                    } else {
+                        targetX = 0;
+                        targetY = -windowHeight * 0.20;
+                        targetScale = 0.60;
+                    }
+
+                    if (t < 0.5) {
+                        activeIndex = 2;
+                        if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-ruler-combined"></i> Muros & Medidas (42°)`;
+                    } else {
+                        activeIndex = 3;
+                        if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-cube"></i> Lado Derecho (90°)`;
+                    }
+                } else {
+                    // STEP 2 -> STEP 3: Hacia Exploración 360° & Acceso Total (Hub en el centro)
+                    // El modelo se centra o eleva ligeramente para dejar espacio al hub central.
+                    const t = easeInOutQuad(Math.min(1, Math.max(0, (scrollY - p2) / Math.max(1, (p3 - p2)))));
+                    targetTheta = lerp(90, 140, t);
+                    targetPhi = lerp(75, 68, t);
+                    targetRadius = lerp(1.66, 1.85, t);
+
+                    if (isDesktop) {
+                        targetX = lerp(windowWidth * 0.23, 0, t);
+                        targetY = lerp(0, -windowHeight * 0.12, t);
+                        targetScale = lerp(0.72, 0.68, t);
+                    } else {
+                        targetX = 0;
+                        targetY = -windowHeight * 0.20;
+                        targetScale = 0.55;
+                    }
+
+                    activeIndex = 4;
+                    if (angleBadge) angleBadge.innerHTML = `<i class="fa-solid fa-arrows-spin"></i> Exploración 360° (${Math.round(targetTheta)}°)`;
+                }
+            }
+
+            // Actualizar dots indicadores
+            dots.forEach((dot, idx) => {
+                if (idx === activeIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        window.addEventListener('scroll', updateScrollyCamera, { passive: true });
+        window.addEventListener('resize', updateScrollyCamera, { passive: true });
+
+        // Bucle de animación: Interpolación ágil de cámara, escala y posición
+        function animateScrollyLoop() {
+            requestAnimationFrame(animateScrollyLoop);
+
+            if (mvHero) {
+                // Interpolación suave y ágil de desplazamiento y escala
+                currentX += (targetX - currentX) * 0.14;
+                currentY += (targetY - currentY) * 0.14;
+                currentScale += (targetScale - currentScale) * 0.14;
+
+                mvHero.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0) scale(${currentScale.toFixed(3)})`;
+
+                // Interpolación suave de cámara si no hay interacción manual
+                if (!isUserDragging && !isHeroAutoRotating) {
+                    currentTheta += (targetTheta - currentTheta) * 0.18;
+                    currentPhi += (targetPhi - currentPhi) * 0.18;
+                    currentRadius += (targetRadius - currentRadius) * 0.18;
+
+                    mvHero.cameraOrbit = `${currentTheta.toFixed(2)}deg ${currentPhi.toFixed(2)}deg ${currentRadius.toFixed(3)}m`;
+                }
+            }
+        }
+        animateScrollyLoop();
+
+        // Navegación fluida por etapas
+        function scrollToStep(target) {
+            if (target === 'hero' || target === 0) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            const map = {
+                1: 'step-0',
+                2: 'step-1',
+                3: 'step-2',
+                4: 'step-3',
+                '0': 'step-0',
+                '1': 'step-1',
+                '2': 'step-2',
+                '3': 'step-3'
+            };
+            const id = map[target] || target;
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function resetToFrontCamera() {
+            isHeroAutoRotating = false;
+            if (mvHero) mvHero.autoRotate = false;
+            targetTheta = 0;
+            targetPhi = 75;
+            targetRadius = 1.62;
+            targetX = 0;
+            targetY = 0;
+            targetScale = 1.0;
+            scrollToStep('hero');
+        }
+
+        function toggleHeroAutoRotate() {
+            if (!mvHero) return;
+            isHeroAutoRotating = !isHeroAutoRotating;
+            mvHero.autoRotate = isHeroAutoRotating;
+            const btn = document.getElementById('btnToggleAutoRotate');
+            if (btn) {
+                btn.style.color = isHeroAutoRotating ? 'var(--accent-sun)' : '#fff';
+            }
+        }
+
+        /* -------------------------------------------------------------
+           SÍNTESIS DE LUZ SOLAR CON LETRAS Y CONTRASTE DE LECTURA
+        ------------------------------------------------------------- */
+        function toggleSolarSynthesis() {
+            isSolarSynthesisActive = !isSolarSynthesisActive;
+            const body = document.body;
+            const btnNav = document.getElementById('btnSolarToggle');
+            const hudBtn = document.getElementById('btnSolarSynthesisHud');
+            const sunCorona = document.querySelector('.sun-corona');
+
+            if (isSolarSynthesisActive) {
+                body.classList.remove('solar-off');
+                body.classList.add('solar-active');
+                if (btnNav) btnNav.innerHTML = '<i class="fa-solid fa-sun" style="color:var(--accent-sun);"></i><span>Luz Solar: Síntesis</span>';
+                if (hudBtn) hudBtn.style.color = 'var(--accent-sun)';
+                if (sunCorona) sunCorona.style.filter = 'drop-shadow(0 0 35px rgba(255, 220, 120, 0.95))';
+                showSolarToast('☀️ Síntesis Solar Activa: Las letras armonizan con la luz solar garantizando alta legibilidad.');
+            } else {
+                body.classList.remove('solar-active');
+                body.classList.add('solar-off');
+                if (btnNav) btnNav.innerHTML = '<i class="fa-regular fa-sun"></i><span>Luz Neutra</span>';
+                if (hudBtn) hudBtn.style.color = '#fff';
+                if (sunCorona) sunCorona.style.filter = 'none';
+                showSolarToast('💡 Modo Contraste Puro: Fondo oscuro profundo y letras de alto contraste.');
+            }
+        }
+
+        function showSolarToast(msg) {
+            let toast = document.getElementById('solarToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'solarToast';
+                toast.className = 'solar-toast';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--accent-sun); font-size:1.2rem;"></i><span>${msg}</span>`;
+            toast.classList.add('show');
+            if (window._solarToastTimer) clearTimeout(window._solarToastTimer);
+            window._solarToastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3200);
+        }
+
+        /* -------------------------------------------------------------
+           TRANSICIÓN A INTERIORES (interiores_T.html)
+        ------------------------------------------------------------- */
+        function transitionToInteriores() {
+            const overlay = document.getElementById('cartoonBlinkOverlay');
+            if (overlay) {
+                overlay.classList.remove('blink-open');
+                overlay.classList.add('blink-close');
+            }
+            setTimeout(() => {
+                window.location.href = 'interiores_T.html';
+            }, 650);
+        }
+
+        /* -------------------------------------------------------------
+           MÚSICA AMBIENTAL (SANGRE DE CÓNDOR)
+        ------------------------------------------------------------- */
+        let bgmPlaying = false;
+        const bgm = document.getElementById('bgmAudio');
+        const bgmIcon = document.getElementById('bgmIcon');
+
+        function toggleBgm() {
+            if (!bgm) return;
+            if (bgmPlaying) {
+                bgm.pause();
+                bgmPlaying = false;
+                if (bgmIcon) bgmIcon.className = 'fa-solid fa-volume-xmark';
+            } else {
+                bgm.play().then(() => {
+                    bgmPlaying = true;
+                    if (bgmIcon) bgmIcon.className = 'fa-solid fa-volume-high';
+                }).catch(err => {
+                    console.warn('Interacción requerida para reproducir audio:', err);
+                });
+            }
+        }
+
+        /* -------------------------------------------------------------
+           MODALES Y TABS
+        ------------------------------------------------------------- */
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal('modalGaleria');
+                closeModal('modalFiguras');
+                closeModal('modalMobileConfig');
+                closeLightbox();
+                document.getElementById('postFxHudPanel').classList.remove('active');
+            }
+        });
+
+        function switchFiguraTab(tabName) {
+            const btnSimon = document.getElementById('btnTabSimon');
+            const btnZombie = document.getElementById('btnTabZombie');
+            const paneSimon = document.getElementById('paneSimon');
+            const paneZombie = document.getElementById('paneZombie');
+
+            if (tabName === 'simon') {
+                btnSimon.classList.add('active');
+                btnZombie.classList.remove('active');
+                paneSimon.classList.add('active');
+                paneZombie.classList.remove('active');
+            } else {
+                btnZombie.classList.add('active');
+                btnSimon.classList.remove('active');
+                paneZombie.classList.add('active');
+                paneSimon.classList.remove('active');
+            }
+        }
+
+        /* -------------------------------------------------------------
+           LIGHTBOX PARA FOTOS
+        ------------------------------------------------------------- */
+        function openLightbox(src) {
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImg');
+            if (modal && img) {
+                img.src = src;
+                modal.classList.add('active');
+            }
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightboxModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        /* -------------------------------------------------------------
+           REALIDAD AUMENTADA (AR)
+        ------------------------------------------------------------- */
+        function triggerAR(viewerId) {
+            const viewer = document.getElementById(viewerId);
+            if (viewer && typeof viewer.activateAR === 'function') {
+                viewer.activateAR();
+            } else {
+                alert('La Realidad Aumentada (AR) está disponible en teléfonos compatibles con WebXR o Scene Viewer.');
+            }
+        }
+
+        /* -------------------------------------------------------------
+           POST-FX SHADERS CONTROLLER
+        ------------------------------------------------------------- */
+        function togglePostFxPanel() {
+            const panel = document.getElementById('postFxHudPanel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        function togglePostEffect(effectName, enabled) {
+            const map = {
+                vignette: document.getElementById('fxVignette'),
+                grain: document.getElementById('fxGrain'),
+                bloom: document.getElementById('fxBloom'),
+                chromatic: document.getElementById('fxChromatic')
+            };
+            const el = map[effectName];
+            if (el) {
+                if (enabled) el.classList.remove('postfx-off');
+                else el.classList.add('postfx-off');
+            }
+        }
+
+        /* -------------------------------------------------------------
+           AJUSTES PARA CELULARES
+        ------------------------------------------------------------- */
+        function toggleMobilePerformance(isLight) {
+            togglePostEffect('grain', !isLight);
+            togglePostEffect('chromatic', !isLight);
+            const chkG = document.getElementById('chkFxGrain');
+            const chkC = document.getElementById('chkFxChromatic');
+            if (chkG) chkG.checked = !isLight;
+            if (chkC) chkC.checked = !isLight;
+        }
+
+        function toggleMobilePan(panSafe) {
+            if (mvHero) {
+                mvHero.setAttribute('touch-action', panSafe ? 'pan-y' : 'none');
+            }
+        }
+
+        let mobileGyro = false;
+        function toggleMobileGyro(enable) {
+            mobileGyro = enable;
+            if (enable) {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission().then(st => {
+                        if (st === 'granted') {
+                            window.addEventListener('deviceorientation', handleGyro);
+                        } else {
+                            alert('Permiso de giroscopio no concedido.');
+                            mobileGyro = false;
+                            document.getElementById('chkMobileGyro').checked = false;
+                        }
+                    }).catch(console.warn);
+                } else {
+                    window.addEventListener('deviceorientation', handleGyro);
+                }
+            } else {
+                window.removeEventListener('deviceorientation', handleGyro);
+            }
+        }
+
+        function handleGyro(e) {
+            if (!mobileGyro || !mvHero) return;
+            const gamma = e.gamma || 0;
+            const beta = e.beta || 0;
+            targetTheta = gamma * 0.6;
+            targetPhi = Math.max(35, Math.min(130, 75 - (beta - 45) * 0.4));
+        }
+
+        // Auto-detección móvil inicial
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 768) {
+                const chk = document.getElementById('chkMobilePerf');
+                if (chk) {
+                    chk.checked = true;
+                    toggleMobilePerformance(true);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
